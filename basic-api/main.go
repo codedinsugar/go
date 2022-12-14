@@ -2,33 +2,21 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
+	"basic-api/handlers" // Provides the handlers package
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
-	//HandleFunc is a convenience method that creates an http handler to respond to http requests
-	http.HandleFunc("/", func(res http.ResponseWriter, req *http.Request) {
-		data, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			http.Error(res, "Uh oh something didn't go right...", http.StatusBadRequest)
-		} else {
-			fmt.Fprintf(res, "Hello %s\n", data)
-			log.Printf("Data: %s\n", data)
-		}
-	})
+	l := log.New(os.Stdout, "product-api", log.LstdFlags)
+	hh := handlers.NewHello(l)
+	gh := handlers.NewGoodbye(l)
 
-	http.HandleFunc("/goodbye", func(res http.ResponseWriter, req *http.Request) {
-		data, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			http.Error(res, "Uh oh something didn't go right...", http.StatusBadRequest)
-		} else {
-			fmt.Fprintf(res, "Goodbye %s\n", data)
-			log.Printf("Data: %s\n", data)
-		}
-	})
+	sm := http.NewServeMux()
+	sm.Handle("/", hh)
+	sm.Handle("/goodbye", gh)
 
-	http.ListenAndServe(":9190", nil) // 9090 is taken by Cockpit UI
+	http.ListenAndServe(":9190", sm)
+
 }
